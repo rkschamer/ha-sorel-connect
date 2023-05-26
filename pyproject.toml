@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "appdaemon-horsmar"
+version = "0.1.0"
+description = ""
+authors = ["René Kschamer <26967205+rkschamer@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "appdaemon_horsmar"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+appdaemon = "^4.4.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

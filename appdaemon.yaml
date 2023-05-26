@@ -1,0 +1,18 @@
+appdaemon:
+  app_dir: apps/
+  log:
+    accessfile: logs/access.log
+    errorfile: logs/error.log
+    logfile: logs/appdaemon.log
+    log_generations: 3
+    log_size: 1000000
+  time_zone: Europe/Berlin
+  # Horsmar
+  latitude: 51.278889
+  longitude: 10.406389
+  elevation: 290
+  plugins:
+    HASS:
+      type: hass
+      ha_url: http://192.168.178.10:8123
+      token: !secret token

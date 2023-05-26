@@ -1,0 +1,3 @@
+HelloWorld:
+  module: hello-world
+  class: HelloWorld
