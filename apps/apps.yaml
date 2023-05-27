@@ -1,3 +1,10 @@
 HelloWorld:
   module: hello-world
   class: HelloWorld
+
+SorelConnect
+  module: sorel-connect
+  class: SorelConnect
+  sorrel-connect-url: !secret sorrel-connect-url
+  sorrel-connect-user: !secret sorrel-connect-user
+  sorrel-connect-password: !secret sorrel-connect-password
