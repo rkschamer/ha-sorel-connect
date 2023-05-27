@@ -1,2 +1,4 @@
 secrets.yaml
 logs/
+
+__pychache__/
