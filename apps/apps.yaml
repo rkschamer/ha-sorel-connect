@@ -1,7 +1,3 @@
-HelloWorld:
-  module: hello-world
-  class: HelloWorld
-
 SorelConnect:
   module: sorel-connect
   class: SorelConnect
