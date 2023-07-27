@@ -66,10 +66,10 @@ class SorelConnect(hass.Hass):
         base_url = self.args["sorel-connect-url"]
         self.base_url_parsed = urlparse(base_url)
 
-        self.get_data_from_sorel_connect(None)
-        # self.run_minutely(
-        #     callback=self.get_data_from_sorel_connect, start=datetime.now()
-        # )
+        # self.get_data_from_sorel_connect(None)
+        self.run_minutely(
+            callback=self.get_data_from_sorel_connect, start=datetime.now()
+        )
 
     def _get_url(self, resource: str, query: dict = {}) -> str:
         if query is None:
@@ -186,7 +186,8 @@ class SorelConnect(hass.Hass):
             self._set_ha_entity_state(ha_entity_id, entity_value.value, attributes)
 
         self.log(
-            f"Setting states for {value_container.sorel_entity_type} in {timedelta(seconds=(timer() - start))}s"
+            f"Setting {len(value_container.values)} states for {value_container.sorel_entity_type} "
+            + f" in {timedelta(seconds=(timer() - start))}s"
         )
 
     def _set_states_for_log(self, log_values: Dict[str, SorelEntityValue]):
@@ -199,7 +200,9 @@ class SorelConnect(hass.Hass):
                 "last_updated": log_value.last_updated,
             }
             self._set_ha_entity_state(ha_entity_id, log_value.value, attributes)
-        self.log(f"Setting states for login {timedelta(seconds=(timer() - start))}s")
+        self.log(
+            f"Setting {len(log_values)} states for log in {timedelta(seconds=(timer() - start))}s"
+        )
 
     def get_data_from_sorel_connect(self, _):
         if not self._has_login_expired():
@@ -209,7 +212,6 @@ class SorelConnect(hass.Hass):
         sensor_values = SorelSensorValueContainer(self._get_sensor_values())
         relay_values = SorelRelayValueContainer(self._get_relay_values())
         log_values = self._get_log_values()
-        # log_values = self._get_log_values()
 
         self._set_states_for_entity(sensor_values)
         self._set_states_for_entity(relay_values)
