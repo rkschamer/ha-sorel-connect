@@ -139,7 +139,7 @@ class SorelConnect(hass.Hass):
                 last_updated=parsed_response_body.get("dt", datetime.utcnow()),
             )
         self.log(
-            f"Retrieving {entity_count} values for {entity_resource}"
+            f"Retrieving {entity_count} values for '{entity_resource}'"
             + f" in {timedelta(seconds=(timer() - start))}s"
         )
         # self.log(f"Values: {entity_values}")
@@ -169,7 +169,7 @@ class SorelConnect(hass.Hass):
         self, ha_entity_id: str, state: str, attributes: Dict[str, Any] = {}
     ):
         if not self.entity_exists(ha_entity_id):
-            self.log(f"Entity {ha_entity_id} does not exist, creating it...")
+            self.log(f"Entity '{ha_entity_id}' does not exist, creating it...")
             self.add_entity(ha_entity_id, state=state, attributes=attributes)
         else:
             self.set_state(ha_entity_id, state=state, attributes=attributes)
@@ -186,7 +186,7 @@ class SorelConnect(hass.Hass):
             self._set_ha_entity_state(ha_entity_id, entity_value.value, attributes)
 
         self.log(
-            f"Setting {len(value_container.values)} states for {value_container.sorel_entity_type} "
+            f"Setting {len(value_container.values)} states for '{value_container.sorel_entity_type}' "
             + f" in {timedelta(seconds=(timer() - start))}s"
         )
 
@@ -201,7 +201,7 @@ class SorelConnect(hass.Hass):
             }
             self._set_ha_entity_state(ha_entity_id, log_value.value, attributes)
         self.log(
-            f"Setting {len(log_values)} states for log in {timedelta(seconds=(timer() - start))}s"
+            f"Setting {len(log_values)} states for 'log' in {timedelta(seconds=(timer() - start))}s"
         )
 
     def get_data_from_sorel_connect(self, _):
