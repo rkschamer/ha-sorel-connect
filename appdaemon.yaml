@@ -1,9 +1,9 @@
 appdaemon:
-  app_dir: apps/
+  app_dir: /config/appdaemon/apps/
   log:
-    accessfile: logs/access.log
-    errorfile: logs/error.log
-    logfile: logs/appdaemon.log
+    accessfile: /config/appdaemon/logs/access.log
+    errorfile: /config/appdaemon/logs/error.log
+    logfile: /config/appdaemon/logs/appdaemon.log
     log_generations: 3
     log_size: 1000000
   time_zone: Europe/Berlin
@@ -16,3 +16,8 @@ appdaemon:
       type: hass
       ha_url: !secret ha-url
       token: !secret token
+http:
+  url: http://127.0.0.1:5050
+admin: {}
+# api: 
+hadashboard: {}
