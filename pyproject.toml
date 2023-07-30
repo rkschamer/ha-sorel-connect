@@ -5,7 +5,6 @@ description = ""
 authors = ["René Kschamer <26967205+rkschamer@users.noreply.github.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "appdaemon_horsmar"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
