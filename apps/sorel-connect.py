@@ -67,9 +67,7 @@ class SorelConnect(hass.Hass):
         self.base_url_parsed = urlparse(base_url)
 
         # self.get_data_from_sorel_connect(None)
-        self.run_minutely(
-            callback=self.get_data_from_sorel_connect, start=datetime.now()
-        )
+        self.run_every(callback=self.get_data_from_sorel_connect, start=datetime.now(), interval=10 * 60)
 
     def _get_url(self, resource: str, query: dict = {}) -> str:
         if query is None:
