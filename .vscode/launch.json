@@ -11,7 +11,8 @@
             "module": "appdaemon",
             "justMyCode": true,
             "args": [
-                "-c", "."
+                "-c", ".",
+                "--debug", "INFO"
             ]
         }
     ]
