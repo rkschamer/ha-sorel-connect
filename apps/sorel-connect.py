@@ -11,9 +11,11 @@ APP_NAMESPACE = "sorel-connect"
 
 SENSOR_RESORUCE: Final[str] = "sensors.json"
 SENSOR_COUNT: Final[int] = 13
+SENOR_UNIT_OF_MEASURE = "°C"
 
 RELAY_RESOURCE: Final[str] = "relays.json"
 RELAY_COUNT: Final[int] = 7
+REPLAY_UNIT_OF_MEASURE = "%"
 
 LOG_RESOURCE: Final[str] = "log.json"
 LOG_COUNT: Final[int] = 3
@@ -40,7 +42,7 @@ class SorelSensorValueContainer(SorelEntityValueContainer):
         super().__init__(
             sorel_entity_type="sensor",
             ha_domain="sensor",
-            unit_of_measure="°C",
+            unit_of_measure=SENOR_UNIT_OF_MEASURE,
             values=values,
         )
 
@@ -50,7 +52,7 @@ class SorelRelayValueContainer(SorelEntityValueContainer):
         super().__init__(
             sorel_entity_type="relay",
             ha_domain="sensor",
-            unit_of_measure="%",
+            unit_of_measure=REPLAY_UNIT_OF_MEASURE,
             values=values,
         )
 
@@ -67,7 +69,11 @@ class SorelConnect(hass.Hass):
         self.base_url_parsed = urlparse(base_url)
 
         # self.get_data_from_sorel_connect(None)
-        self.run_every(callback=self.get_data_from_sorel_connect, start=datetime.now(), interval=10 * 60)
+        self.run_every(
+            callback=self.get_data_from_sorel_connect,
+            start=datetime.now(),
+            interval=5 * 60,
+        )
 
     def _get_url(self, resource: str, query: dict = {}) -> str:
         if query is None:
@@ -143,18 +149,33 @@ class SorelConnect(hass.Hass):
         # self.log(f"Values: {entity_values}")
         return entity_values
 
+    def _clean_sensor_value(self, raw_value: str) -> str:
+        return raw_value.rstrip(SENOR_UNIT_OF_MEASURE)
+
     def _get_sensor_values(self) -> Dict[str, SorelEntityValue]:
         raw_values = self._get_entity_values(SENSOR_RESORUCE, SENSOR_COUNT)
-        filtered_values = {k: v for k, v in raw_values.items() if v.value != "--"}
+        filtered_values = {
+            k: SorelEntityValue(
+                value=self._clean_sensor_value(v.value), last_updated=v.last_updated
+            )
+            for k, v in raw_values.items()
+            if v.value != "--"
+        }
         return filtered_values
 
-    def _get_relay_values(self) -> Dict[str, SorelEntityValue]:
+    def _clean_relay_value(self, raw_value: str) -> str:
         # values look like '0_0%', '30_30%' or '0_Aus'
-        raw_values = self._get_entity_values(RELAY_RESOURCE, RELAY_COUNT)
         # removing the '0_' prefix
+        value = raw_value.split("_", 1)[1]
+        # remove unit of measure
+        value = value.rstrip(REPLAY_UNIT_OF_MEASURE)
+        return value
+
+    def _get_relay_values(self) -> Dict[str, SorelEntityValue]:
+        raw_values = self._get_entity_values(RELAY_RESOURCE, RELAY_COUNT)
         values = {
             k: SorelEntityValue(
-                value=v.value.split("_", 1)[1], last_updated=v.last_updated
+                value=self._clean_relay_value(v.value), last_updated=v.last_updated
             )
             for k, v in raw_values.items()
         }
