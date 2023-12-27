@@ -1,11 +1,5 @@
 appdaemon:
   app_dir: apps
-  log:
-    accessfile: logs/access.log
-    errorfile: logs/error.log
-    logfile: logs/appdaemon.log
-    log_generations: 3
-    log_size: 1000000
   time_zone: Europe/Berlin
   # Horsmar
   latitude: 51.278889
@@ -14,10 +8,27 @@ appdaemon:
   plugins:
     HASS:
       type: hass
-      ha_url: !secret ha-url
-      token: !secret token
+      # only needed if not used as HA Addon
+      #ha_url: !secret ha-url
+      #token: !secret token
 http:
   url: http://127.0.0.1:5050
 admin: {}
-# api: 
+api: {}
 hadashboard: {}
+
+# example HA Addon Conifg
+# ---
+# appdaemon:
+#   latitude: 52.379189
+#   longitude: 4.899431
+#   elevation: 2
+#   time_zone: Europe/Amsterdam
+#   plugins:
+#     HASS:
+#       type: hass
+# http:
+#   url: http://127.0.0.1:5050
+# admin:
+# api:
+# hadashboard:
