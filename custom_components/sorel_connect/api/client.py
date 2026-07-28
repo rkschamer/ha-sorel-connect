@@ -7,6 +7,23 @@ import aiohttp
 from yarl import URL
 
 from .exceptions import SorelAuthError, SorelConnectionError
+from .models import RelayReading, SensorReading, SorelData
+
+
+def _clean_sensor(raw: str) -> float | None:
+    """Convert a sensor string like '42°C' to a float, or None if '--'."""
+    raw = raw.strip()
+    if raw == "--":
+        return None
+    return float(raw.rstrip("°C"))
+
+
+def _clean_relay(raw: str) -> float:
+    """Convert a relay string like '0_30%' or '0_Aus' to a percentage float."""
+    value = raw.split("_", 1)[1].strip()
+    if value == "Aus":
+        return 0.0
+    return float(value.rstrip("%"))
 
 
 class SorelConnectClient:
@@ -87,3 +104,25 @@ class SorelConnectClient:
         )
         logs = int((await self._get_json(self._url("log.json", {"id": 0})))["val"])
         return sensors, relays, logs
+
+    async def get_all(self) -> SorelData:
+        sensor_count, relay_count, log_count = await self.get_counts()
+
+        sensors: dict[int, SensorReading] = {}
+        for sid in range(1, sensor_count + 1):
+            raw = (await self._get_json(self._url("sensors.json", {"id": sid})))["val"]
+            value = _clean_sensor(str(raw))
+            if value is not None:
+                sensors[sid] = SensorReading(id=sid, value=value)
+
+        relays: dict[int, RelayReading] = {}
+        for rid in range(1, relay_count + 1):
+            raw = (await self._get_json(self._url("relays.json", {"id": rid})))["val"]
+            relays[rid] = RelayReading(id=rid, value=_clean_relay(str(raw)))
+
+        logs: list[str] = []
+        for lid in range(1, log_count + 1):
+            raw = (await self._get_json(self._url("log.json", {"id": lid})))["val"]
+            logs.append(str(raw))
+
+        return SorelData(sensors=sensors, relays=relays, logs=logs)
