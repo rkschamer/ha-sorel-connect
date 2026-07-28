@@ -2,7 +2,7 @@
 
 A HACS-installable custom component that polls a [Sorel Connect](https://www.sorel.de/)
 heating controller over HTTP and exposes its sensors, relays, and log as native
-Home Assistant entities. No MQTT broker required.
+Home Assistant entities.
 
 ## Installation (HACS)
 
