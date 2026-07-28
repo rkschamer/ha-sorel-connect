@@ -28,11 +28,22 @@ async def _start(hass):
     )
 
 
-async def test_user_flow_success_creates_entry(hass):
+async def test_user_flow_success_creates_entry(hass, sample_data):
     result = await _start(hass)
-    with patch(
-        "custom_components.sorel_connect.config_flow.SorelConnectClient.login",
-        new=AsyncMock(),
+    with (
+        patch(
+            "custom_components.sorel_connect.config_flow.SorelConnectClient.login",
+            new=AsyncMock(),
+        ),
+        patch("custom_components.sorel_connect.aiohttp.ClientSession"),
+        patch(
+            "custom_components.sorel_connect.SorelConnectClient.login",
+            new=AsyncMock(),
+        ),
+        patch(
+            "custom_components.sorel_connect.SorelConnectClient.get_all",
+            new=AsyncMock(return_value=sample_data),
+        ),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], USER_INPUT
