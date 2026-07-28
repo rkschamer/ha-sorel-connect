@@ -14,6 +14,7 @@ class _FakeResponse:
     def __init__(self, body: str | None, exc: Exception | None) -> None:
         self._body = body
         self._exc = exc
+        self.cookies: dict = {}
 
     async def __aenter__(self) -> _FakeResponse:
         if self._exc is not None:

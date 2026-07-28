@@ -84,16 +84,28 @@ class SorelConnectClient:
             "/nabto/hosted_plugin/login/execute",
             {"email": self._email, "password": self._password},
         )
-        body = await self._get_json(url)
+        # Perform the request directly so we can read the raw Set-Cookie header
+        # before the cookie jar stores it path-scoped to the login path.
+        try:
+            async with self._session.get(
+                url, headers={"X-Requested-With": "XMLHttpRequest"}
+            ) as resp:
+                resp.raise_for_status()
+                raw_cookie = resp.cookies.get("nabto-session")
+                text = await resp.text(encoding="utf-8")
+        except aiohttp.ClientError as err:
+            raise SorelConnectionError(str(err)) from err
+
+        body = self._parse_body(text)
         if not body.get("session_key"):
             raise SorelAuthError("Login rejected: no session_key in response")
-        # The Set-Cookie is scoped to the login path; broaden it to / so it is
-        # sent with subsequent data requests.
-        cookie = self._session.cookie_jar.filter_cookies(URL(self._url("/"))).get(
-            "nabto-session"
-        )
-        if cookie is not None:
-            self._session.cookie_jar.update_cookies({"nabto-session": cookie.value})
+
+        # Re-insert the cookie scoped to / so it is sent with all data requests.
+        if raw_cookie is not None:
+            self._session.cookie_jar.update_cookies(
+                {"nabto-session": raw_cookie.value},
+                URL(self._url("/")),
+            )
 
     async def get_counts(self) -> tuple[int, int, int]:
         sensors = int(
