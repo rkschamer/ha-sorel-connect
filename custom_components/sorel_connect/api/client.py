@@ -4,8 +4,9 @@ import json
 from urllib.parse import ParseResult, urlencode, urlparse, urlunparse
 
 import aiohttp
+from yarl import URL
 
-from .exceptions import SorelConnectionError
+from .exceptions import SorelAuthError, SorelConnectionError
 
 
 class SorelConnectClient:
@@ -49,3 +50,40 @@ class SorelConnectClient:
             return json.loads(text[start : end + 1])
         except json.JSONDecodeError as err:
             raise SorelConnectionError(f"Invalid JSON in response: {text!r}") from err
+
+    async def _get_json(self, url: str) -> dict:
+        try:
+            async with self._session.get(
+                url, headers={"X-Requested-With": "XMLHttpRequest"}
+            ) as resp:
+                resp.raise_for_status()
+                text = await resp.text(encoding="utf-8")
+        except aiohttp.ClientError as err:
+            raise SorelConnectionError(str(err)) from err
+        return self._parse_body(text)
+
+    async def login(self) -> None:
+        url = self._url(
+            "/nabto/hosted_plugin/login/execute",
+            {"email": self._email, "password": self._password},
+        )
+        body = await self._get_json(url)
+        if not body.get("session_key"):
+            raise SorelAuthError("Login rejected: no session_key in response")
+        # The Set-Cookie is scoped to the login path; broaden it to / so it is
+        # sent with subsequent data requests.
+        cookie = self._session.cookie_jar.filter_cookies(URL(self._url("/"))).get(
+            "nabto-session"
+        )
+        if cookie is not None:
+            self._session.cookie_jar.update_cookies({"nabto-session": cookie.value})
+
+    async def get_counts(self) -> tuple[int, int, int]:
+        sensors = int(
+            (await self._get_json(self._url("sensors.json", {"id": 0})))["val"]
+        )
+        relays = int(
+            (await self._get_json(self._url("relays.json", {"id": 0})))["val"]
+        )
+        logs = int((await self._get_json(self._url("log.json", {"id": 0})))["val"])
+        return sensors, relays, logs
