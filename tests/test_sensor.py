@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, patch
 
 from homeassistant.const import UnitOfTemperature
+from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.sorel_connect.const import (
@@ -40,17 +41,23 @@ async def _setup(hass, sample_data):
     return entry
 
 
+def _state(hass, unique_id: str):
+    registry = er.async_get(hass)
+    entry = registry.async_get_entity_id("sensor", DOMAIN, unique_id)
+    return hass.states.get(entry) if entry else None
+
+
 async def test_creates_only_connected_sensors(hass, sample_data):
     # sample_data has sensors {1, 3}, relays {1}
     await _setup(hass, sample_data)
-    assert hass.states.get("sensor.sorel_connect_sensor_1") is not None
-    assert hass.states.get("sensor.sorel_connect_sensor_3") is not None
-    assert hass.states.get("sensor.sorel_connect_sensor_2") is None
+    assert _state(hass, "sorel_connect_sensor_1") is not None
+    assert _state(hass, "sorel_connect_sensor_3") is not None
+    assert _state(hass, "sorel_connect_sensor_2") is None
 
 
 async def test_sensor_state_and_unit(hass, sample_data):
     await _setup(hass, sample_data)
-    state = hass.states.get("sensor.sorel_connect_sensor_1")
+    state = _state(hass, "sorel_connect_sensor_1")
     assert state.state == "42.0"
     assert state.attributes["unit_of_measurement"] == UnitOfTemperature.CELSIUS
     assert state.attributes["device_class"] == "temperature"
@@ -58,7 +65,7 @@ async def test_sensor_state_and_unit(hass, sample_data):
 
 async def test_relay_state_and_unit(hass, sample_data):
     await _setup(hass, sample_data)
-    state = hass.states.get("sensor.sorel_connect_relay_1")
+    state = _state(hass, "sorel_connect_relay_1")
     assert state.state == "30.0"
     assert state.attributes["unit_of_measurement"] == "%"
     assert "device_class" not in state.attributes
@@ -66,7 +73,7 @@ async def test_relay_state_and_unit(hass, sample_data):
 
 async def test_log_entity_state_and_attributes(hass, sample_data):
     await _setup(hass, sample_data)
-    state = hass.states.get("sensor.sorel_connect_log")
+    state = _state(hass, "sorel_connect_log")
     assert state.state == "newest"
     assert state.attributes["log_1"] == "newest"
     assert state.attributes["log_2"] == "middle"
