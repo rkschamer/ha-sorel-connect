@@ -44,7 +44,4 @@ def test_url_with_query():
 
 def test_url_without_query():
     client = _make_client()
-    assert (
-        client._url("sensors.json")
-        == "https://test.sorel-connect.net/sensors.json"
-    )
+    assert client._url("sensors.json") == "https://test.sorel-connect.net/sensors.json"

@@ -26,11 +26,14 @@ async def _setup(hass, sample_data):
         options={CONF_SCAN_INTERVAL: 300},
     )
     entry.add_to_hass(hass)
-    with patch(
-        "custom_components.sorel_connect.SorelConnectClient.login", new=AsyncMock()
-    ), patch(
-        "custom_components.sorel_connect.SorelConnectClient.get_all",
-        new=AsyncMock(return_value=sample_data),
+    with (
+        patch(
+            "custom_components.sorel_connect.SorelConnectClient.login", new=AsyncMock()
+        ),
+        patch(
+            "custom_components.sorel_connect.SorelConnectClient.get_all",
+            new=AsyncMock(return_value=sample_data),
+        ),
     ):
         await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()

@@ -99,9 +99,7 @@ class SorelConnectClient:
         sensors = int(
             (await self._get_json(self._url("sensors.json", {"id": 0})))["val"]
         )
-        relays = int(
-            (await self._get_json(self._url("relays.json", {"id": 0})))["val"]
-        )
+        relays = int((await self._get_json(self._url("relays.json", {"id": 0})))["val"])
         logs = int((await self._get_json(self._url("log.json", {"id": 0})))["val"])
         return sensors, relays, logs
 

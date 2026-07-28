@@ -354,10 +354,7 @@ def test_url_with_query():
 
 def test_url_without_query():
     client = _make_client()
-    assert (
-        client._url("sensors.json")
-        == "https://test.sorel-connect.net/sensors.json"
-    )
+    assert client._url("sensors.json") == "https://test.sorel-connect.net/sensors.json"
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -541,40 +538,40 @@ Expected: FAIL — `login`, `get_counts`, `_get_json` not defined.
 Add to `custom_components/sorel_connect/api/client.py` (imports `aiohttp` already present):
 
 ```python
-    async def _get_json(self, url: str) -> dict:
-        try:
-            async with self._session.get(
-                url, headers={"X-Requested-With": "XMLHttpRequest"}
-            ) as resp:
-                resp.raise_for_status()
-                text = await resp.text(encoding="utf-8")
-        except aiohttp.ClientError as err:
-            raise SorelConnectionError(str(err)) from err
-        return self._parse_body(text)
+async def _get_json(self, url: str) -> dict:
+    try:
+        async with self._session.get(
+            url, headers={"X-Requested-With": "XMLHttpRequest"}
+        ) as resp:
+            resp.raise_for_status()
+            text = await resp.text(encoding="utf-8")
+    except aiohttp.ClientError as err:
+        raise SorelConnectionError(str(err)) from err
+    return self._parse_body(text)
 
-    async def login(self) -> None:
-        url = self._url(
-            "/nabto/hosted_plugin/login/execute",
-            {"email": self._email, "password": self._password},
-        )
-        body = await self._get_json(url)
-        if not body.get("session_key"):
-            raise SorelAuthError("Login rejected: no session_key in response")
-        # The Set-Cookie is scoped to the login path; broaden it to / so it is
-        # sent with subsequent data requests.
-        cookie = self._session.cookie_jar.filter_cookies(
-            self._url("/")
-        ).get("nabto-session")
-        if cookie is not None:
-            self._session.cookie_jar.update_cookies(
-                {"nabto-session": cookie.value}
-            )
 
-    async def get_counts(self) -> tuple[int, int, int]:
-        sensors = int((await self._get_json(self._url("sensors.json", {"id": 0})))["val"])
-        relays = int((await self._get_json(self._url("relays.json", {"id": 0})))["val"])
-        logs = int((await self._get_json(self._url("log.json", {"id": 0})))["val"])
-        return sensors, relays, logs
+async def login(self) -> None:
+    url = self._url(
+        "/nabto/hosted_plugin/login/execute",
+        {"email": self._email, "password": self._password},
+    )
+    body = await self._get_json(url)
+    if not body.get("session_key"):
+        raise SorelAuthError("Login rejected: no session_key in response")
+    # The Set-Cookie is scoped to the login path; broaden it to / so it is
+    # sent with subsequent data requests.
+    cookie = self._session.cookie_jar.filter_cookies(self._url("/")).get(
+        "nabto-session"
+    )
+    if cookie is not None:
+        self._session.cookie_jar.update_cookies({"nabto-session": cookie.value})
+
+
+async def get_counts(self) -> tuple[int, int, int]:
+    sensors = int((await self._get_json(self._url("sensors.json", {"id": 0})))["val"])
+    relays = int((await self._get_json(self._url("relays.json", {"id": 0})))["val"])
+    logs = int((await self._get_json(self._url("log.json", {"id": 0})))["val"])
+    return sensors, relays, logs
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -885,7 +882,10 @@ from custom_components.sorel_connect.api.models import (
 @pytest.fixture
 def sample_data() -> SorelData:
     return SorelData(
-        sensors={1: SensorReading(id=1, value=42.0), 3: SensorReading(id=3, value=24.0)},
+        sensors={
+            1: SensorReading(id=1, value=42.0),
+            3: SensorReading(id=3, value=24.0),
+        },
         relays={1: RelayReading(id=1, value=30.0)},
         logs=["newest", "middle", "oldest"],
     )
@@ -1208,9 +1208,7 @@ from .const import (
 )
 
 
-async def _validate(
-    hass: HomeAssistant, url: str, email: str, password: str
-) -> None:
+async def _validate(hass: HomeAssistant, url: str, email: str, password: str) -> None:
     """Attempt a login; raises SorelAuthError / SorelConnectionError."""
     session = async_get_clientsession(hass)
     client = SorelConnectClient(session, url, email, password)
@@ -1271,9 +1269,7 @@ class SorelConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def async_step_reauth(
-        self, entry_data: dict[str, Any]
-    ) -> ConfigFlowResult:
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
         return await self.async_step_reauth_confirm()
 
     async def async_step_reauth_confirm(
@@ -1429,11 +1425,14 @@ async def test_setup_and_unload_entry(hass, sample_data):
     )
     entry.add_to_hass(hass)
 
-    with patch(
-        "custom_components.sorel_connect.SorelConnectClient.login", new=AsyncMock()
-    ), patch(
-        "custom_components.sorel_connect.SorelConnectClient.get_all",
-        new=AsyncMock(return_value=sample_data),
+    with (
+        patch(
+            "custom_components.sorel_connect.SorelConnectClient.login", new=AsyncMock()
+        ),
+        patch(
+            "custom_components.sorel_connect.SorelConnectClient.get_all",
+            new=AsyncMock(return_value=sample_data),
+        ),
     ):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
@@ -1569,11 +1568,14 @@ async def _setup(hass, sample_data):
         options={CONF_SCAN_INTERVAL: 300},
     )
     entry.add_to_hass(hass)
-    with patch(
-        "custom_components.sorel_connect.SorelConnectClient.login", new=AsyncMock()
-    ), patch(
-        "custom_components.sorel_connect.SorelConnectClient.get_all",
-        new=AsyncMock(return_value=sample_data),
+    with (
+        patch(
+            "custom_components.sorel_connect.SorelConnectClient.login", new=AsyncMock()
+        ),
+        patch(
+            "custom_components.sorel_connect.SorelConnectClient.get_all",
+            new=AsyncMock(return_value=sample_data),
+        ),
     ):
         await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()

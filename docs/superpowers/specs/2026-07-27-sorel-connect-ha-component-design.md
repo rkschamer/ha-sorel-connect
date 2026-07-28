@@ -67,8 +67,9 @@ with an injected session:
 
 ```python
 class SorelConnectClient:
-    def __init__(self, session: aiohttp.ClientSession,
-                 base_url: str, email: str, password: str): ...
+    def __init__(
+        self, session: aiohttp.ClientSession, base_url: str, email: str, password: str
+    ): ...
 ```
 
 ### Methods
@@ -109,16 +110,18 @@ class SensorReading:
     id: int
     value: float
 
+
 @dataclass
 class RelayReading:
     id: int
-    value: float          # percentage; "Aus" mapped to 0
+    value: float  # percentage; "Aus" mapped to 0
+
 
 @dataclass
 class SorelData:
-    sensors: dict[int, SensorReading]   # only connected sensors
-    relays:  dict[int, RelayReading]    # only connected relays
-    logs:    list[str]                  # newest first
+    sensors: dict[int, SensorReading]  # only connected sensors
+    relays: dict[int, RelayReading]  # only connected relays
+    logs: list[str]  # newest first
 ```
 
 ### Exceptions
