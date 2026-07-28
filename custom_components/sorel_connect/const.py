@@ -9,5 +9,5 @@ CONF_EMAIL = "email"
 CONF_PASSWORD = "password"
 CONF_SCAN_INTERVAL = "scan_interval"
 
-MANUFACTURER = "Sorel"
+MANUFACTURER = "Sorel Mikroelektronik GmbH"
 MODEL = "SOREL Connect"
