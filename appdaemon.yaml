@@ -10,8 +10,16 @@ appdaemon:
     HASS:
       type: hass
       # only needed if not used as HA Addon
-      #ha_url: !secret ha-url
-      #token: !secret token
+      ha_url: !secret ha-url
+      token: !secret token
+    MQTT:
+      type: mqtt
+      namespace: mqtt
+      client_host: !secret mqtt-host
+      client_port: 1883
+      client_user: !secret mqtt-user
+      client_password: !secret mqtt-password
+      client_id: appdaemon
 http:
   url: http://127.0.0.1:5050
 admin: {}
