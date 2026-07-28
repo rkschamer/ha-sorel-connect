@@ -19,10 +19,12 @@ def _clean_sensor(raw: str) -> float | None:
 
 
 def _clean_relay(raw: str) -> float:
-    """Convert a relay string like '0_30%' or '0_Aus' to a percentage float."""
+    """Convert a relay string like '0_30%', '0_Aus', or '0_Ein' to a float."""
     value = raw.split("_", 1)[1].strip()
     if value == "Aus":
         return 0.0
+    if value == "Ein":
+        return 100.0
     return float(value.rstrip("%"))
 
 

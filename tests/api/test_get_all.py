@@ -49,6 +49,10 @@ def test_clean_relay_aus_is_zero():
     assert _clean_relay("0_Aus") == 0.0
 
 
+def test_clean_relay_ein_is_hundred():
+    assert _clean_relay("0_Ein") == 100.0
+
+
 async def test_get_all_skips_unconnected_sensors():
     session = FakeSession(
         {
