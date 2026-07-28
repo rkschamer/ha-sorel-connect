@@ -1,6 +1,0 @@
-SorelConnect:
-  module: sorel-connect
-  class: SorelConnect
-  sorel-connect-url: !secret sorel-connect-url
-  sorel-connect-user: !secret sorel-connect-user
-  sorel-connect-password: !secret sorel-connect-password

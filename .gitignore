@@ -1,6 +1,6 @@
-secrets.yaml
-*.http
-*.ipynb
-logs/
-
 __pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+logs/

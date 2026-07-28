@@ -1,0 +1,1 @@
+"""The Sorel Connect integration."""
