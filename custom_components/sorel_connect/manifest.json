@@ -1,0 +1,11 @@
+{
+  "domain": "sorel_connect",
+  "name": "Sorel Connect",
+  "codeowners": ["@rkschamer"],
+  "config_flow": true,
+  "documentation": "https://github.com/rkschamer/sorel-connect",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/rkschamer/sorel-connect/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
