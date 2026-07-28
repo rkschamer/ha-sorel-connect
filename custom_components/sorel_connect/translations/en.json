@@ -6,6 +6,8 @@
           "url": "URL",
           "email": "Email",
           "password": "Password",
+          "name": "Device name",
+          "area": "Area",
           "scan_interval": "Poll interval (seconds)"
         }
       },

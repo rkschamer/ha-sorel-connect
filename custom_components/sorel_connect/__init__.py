@@ -5,10 +5,13 @@ from __future__ import annotations
 import aiohttp
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 
 from .api.client import SorelConnectClient
 from .const import (
+    CONF_AREA,
     CONF_EMAIL,
+    CONF_NAME,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
@@ -40,6 +43,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
     entry.async_on_unload(session.close)
+
+    # Apply user-supplied device name and area to the device registry entry.
+    device_name = entry.data.get(CONF_NAME) or entry.title
+    area_id = entry.data.get(CONF_AREA)
+    dev_registry = dr.async_get(hass)
+    device = dev_registry.async_get_device(identifiers={(DOMAIN, "sorel_connect")})
+    if device is not None:
+        dev_registry.async_update_device(
+            device.id,
+            name=device_name,
+            area_id=area_id,
+        )
+
     return True
 
 
