@@ -11,6 +11,12 @@ from custom_components.sorel_connect.api.models import (
 )
 
 
+@pytest.fixture(autouse=True)
+def auto_enable_custom_integrations(enable_custom_integrations):
+    """Enable loading of the custom integration in all tests."""
+    yield
+
+
 @pytest.fixture
 def sample_data() -> SorelData:
     return SorelData(

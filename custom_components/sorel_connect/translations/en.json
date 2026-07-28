@@ -1,0 +1,32 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "url": "URL",
+          "email": "Email",
+          "password": "Password",
+          "scan_interval": "Poll interval (seconds)"
+        }
+      },
+      "reauth_confirm": {
+        "data": { "password": "Password" }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid credentials",
+      "cannot_connect": "Failed to connect"
+    },
+    "abort": {
+      "already_configured": "This controller is already configured",
+      "reauth_successful": "Re-authentication was successful"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": { "scan_interval": "Poll interval (seconds)" }
+      }
+    }
+  }
+}
