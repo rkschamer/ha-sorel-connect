@@ -42,35 +42,31 @@ async def _setup(hass, sample_data):
 
 async def test_creates_only_connected_sensors(hass, sample_data):
     # sample_data has sensors {1, 3}, relays {1}
-    entry = await _setup(hass, sample_data)
-    slug = entry.title.lower().replace(" ", "_")
-    assert hass.states.get(f"sensor.{slug}_sensor_1") is not None
-    assert hass.states.get(f"sensor.{slug}_sensor_3") is not None
-    assert hass.states.get(f"sensor.{slug}_sensor_2") is None
+    await _setup(hass, sample_data)
+    assert hass.states.get("sensor.sorel_connect_sensor_1") is not None
+    assert hass.states.get("sensor.sorel_connect_sensor_3") is not None
+    assert hass.states.get("sensor.sorel_connect_sensor_2") is None
 
 
 async def test_sensor_state_and_unit(hass, sample_data):
-    entry = await _setup(hass, sample_data)
-    slug = entry.title.lower().replace(" ", "_")
-    state = hass.states.get(f"sensor.{slug}_sensor_1")
+    await _setup(hass, sample_data)
+    state = hass.states.get("sensor.sorel_connect_sensor_1")
     assert state.state == "42.0"
     assert state.attributes["unit_of_measurement"] == UnitOfTemperature.CELSIUS
     assert state.attributes["device_class"] == "temperature"
 
 
 async def test_relay_state_and_unit(hass, sample_data):
-    entry = await _setup(hass, sample_data)
-    slug = entry.title.lower().replace(" ", "_")
-    state = hass.states.get(f"sensor.{slug}_relay_1")
+    await _setup(hass, sample_data)
+    state = hass.states.get("sensor.sorel_connect_relay_1")
     assert state.state == "30.0"
     assert state.attributes["unit_of_measurement"] == "%"
     assert "device_class" not in state.attributes
 
 
 async def test_log_entity_state_and_attributes(hass, sample_data):
-    entry = await _setup(hass, sample_data)
-    slug = entry.title.lower().replace(" ", "_")
-    state = hass.states.get(f"sensor.{slug}_log")
+    await _setup(hass, sample_data)
+    state = hass.states.get("sensor.sorel_connect_log")
     assert state.state == "newest"
     assert state.attributes["log_1"] == "newest"
     assert state.attributes["log_2"] == "middle"

@@ -16,17 +16,15 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_NAME, DOMAIN, MANUFACTURER, MODEL
+from .const import DOMAIN, MANUFACTURER, MODEL
 from .coordinator import SorelCoordinator
 
-
-def _device_info(entry: ConfigEntry) -> DeviceInfo:
-    return DeviceInfo(
-        identifiers={(DOMAIN, "sorel_connect")},
-        name=entry.data.get(CONF_NAME) or entry.title,
-        manufacturer=MANUFACTURER,
-        model=MODEL,
-    )
+_DEVICE_INFO = DeviceInfo(
+    identifiers={(DOMAIN, "sorel_connect")},
+    name="Sorel Connect",
+    manufacturer=MANUFACTURER,
+    model=MODEL,
+)
 
 
 async def async_setup_entry(
@@ -36,17 +34,14 @@ async def async_setup_entry(
 ) -> None:
     """Set up entities from the first coordinator poll."""
     coordinator: SorelCoordinator = hass.data[DOMAIN][entry.entry_id]
-    device_info = _device_info(entry)
     entities: list[SensorEntity] = []
     entities.extend(
-        SorelSensorEntity(coordinator, sid, device_info)
-        for sid in coordinator.data.sensors
+        SorelSensorEntity(coordinator, sid) for sid in coordinator.data.sensors
     )
     entities.extend(
-        SorelRelayEntity(coordinator, rid, device_info)
-        for rid in coordinator.data.relays
+        SorelRelayEntity(coordinator, rid) for rid in coordinator.data.relays
     )
-    entities.append(SorelLogEntity(coordinator, device_info))
+    entities.append(SorelLogEntity(coordinator))
     async_add_entities(entities)
 
 
@@ -56,15 +51,13 @@ class SorelSensorEntity(CoordinatorEntity[SorelCoordinator], SensorEntity):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_info = _DEVICE_INFO
 
-    def __init__(
-        self, coordinator: SorelCoordinator, sensor_id: int, device_info: DeviceInfo
-    ) -> None:
+    def __init__(self, coordinator: SorelCoordinator, sensor_id: int) -> None:
         super().__init__(coordinator)
         self._id = sensor_id
         self._attr_name = f"Sensor {sensor_id}"
         self._attr_unique_id = f"sorel_connect_sensor_{sensor_id}"
-        self._attr_device_info = device_info
 
     @property
     def native_value(self) -> float | None:
@@ -77,15 +70,13 @@ class SorelRelayEntity(CoordinatorEntity[SorelCoordinator], SensorEntity):
 
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_device_info = _DEVICE_INFO
 
-    def __init__(
-        self, coordinator: SorelCoordinator, relay_id: int, device_info: DeviceInfo
-    ) -> None:
+    def __init__(self, coordinator: SorelCoordinator, relay_id: int) -> None:
         super().__init__(coordinator)
         self._id = relay_id
         self._attr_name = f"Relay {relay_id}"
         self._attr_unique_id = f"sorel_connect_relay_{relay_id}"
-        self._attr_device_info = device_info
 
     @property
     def native_value(self) -> float | None:
@@ -98,10 +89,10 @@ class SorelLogEntity(CoordinatorEntity[SorelCoordinator], SensorEntity):
 
     _attr_name = "Log"
     _attr_unique_id = "sorel_connect_log"
+    _attr_device_info = _DEVICE_INFO
 
-    def __init__(self, coordinator: SorelCoordinator, device_info: DeviceInfo) -> None:
+    def __init__(self, coordinator: SorelCoordinator) -> None:
         super().__init__(coordinator)
-        self._attr_device_info = device_info
 
     @property
     def native_value(self) -> str | None:

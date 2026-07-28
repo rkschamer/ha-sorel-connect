@@ -14,18 +14,14 @@ from homeassistant.config_entries import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.selector import AreaSelector
 
 from .api.client import SorelConnectClient
 from .api.exceptions import SorelAuthError, SorelConnectionError
 from .const import (
-    CONF_AREA,
     CONF_EMAIL,
-    CONF_NAME,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
     CONF_URL,
-    DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
@@ -64,13 +60,11 @@ class SorelConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors["base"] = "cannot_connect"
             else:
                 return self.async_create_entry(
-                    title=user_input.get(CONF_NAME) or host,
+                    title=host,
                     data={
                         CONF_URL: user_input[CONF_URL],
                         CONF_EMAIL: user_input[CONF_EMAIL],
                         CONF_PASSWORD: user_input[CONF_PASSWORD],
-                        CONF_NAME: user_input.get(CONF_NAME) or host,
-                        CONF_AREA: user_input.get(CONF_AREA),
                     },
                     options={
                         CONF_SCAN_INTERVAL: user_input.get(
@@ -86,8 +80,6 @@ class SorelConfigFlow(ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_URL): str,
                     vol.Required(CONF_EMAIL): str,
                     vol.Required(CONF_PASSWORD): str,
-                    vol.Optional(CONF_NAME, default=DEFAULT_NAME): str,
-                    vol.Optional(CONF_AREA): AreaSelector(),
                     vol.Required(
                         CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
                     ): int,
