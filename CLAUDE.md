@@ -2,6 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Publishing a new version
+
+When publishing a new release, bump the version in **both** of these files (they must stay in sync):
+
+- `custom_components/sorel_connect/manifest.json` — `"version"` field (read by HA)
+- `pyproject.toml` — `version` field (Python package metadata)
+
+Use semver (`MAJOR.MINOR.PATCH`). Then:
+
+1. Commit the version bump.
+2. Create and push a git tag: `git tag v0.1.x && git push origin v0.1.x`
+3. The `release.yml` GitHub Actions workflow triggers automatically and creates a GitHub Release with auto-generated notes. HACS discovers new versions through GitHub Releases.
+
 ## Commands
 
 ```bash

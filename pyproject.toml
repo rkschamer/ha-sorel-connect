@@ -1,6 +1,6 @@
 [project]
 name = "sorel-connect"
-version = "0.1.0"
+version = "0.1.1"
 description = "Home Assistant custom component for the Sorel Connect heating controller"
 readme = "README.md"
 license = { text = "MIT" }
