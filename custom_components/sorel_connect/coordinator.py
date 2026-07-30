@@ -48,6 +48,7 @@ class SorelCoordinator(DataUpdateCoordinator[SorelData]):
                 self._logged_in = False
                 raise ConfigEntryAuthFailed("Re-authentication failed") from err
         except SorelConnectionError as err:
+            self._logged_in = False
             raise UpdateFailed(str(err)) from err
 
     async def _login(self) -> None:

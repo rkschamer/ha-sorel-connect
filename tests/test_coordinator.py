@@ -47,3 +47,18 @@ async def test_connection_error_raises_update_failed(hass, mock_client):
     mock_client.get_all = AsyncMock(side_effect=SorelConnectionError())
     with pytest.raises(UpdateFailed):
         await coordinator._async_update_data()
+
+
+async def test_connection_error_resets_login_flag(hass, mock_client):
+    # After a connection error (e.g. 502 Proxy Error due to expired Nabto session)
+    # the next update must re-login instead of staying stuck in failure.
+    coordinator = SorelCoordinator(hass, mock_client, scan_interval=300)
+    await coordinator._async_update_data()  # logged in
+    mock_client.get_all = AsyncMock(side_effect=SorelConnectionError())
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_update_data()
+    assert coordinator._logged_in is False
+    # Simulate recovery: next poll should trigger login again.
+    mock_client.get_all = AsyncMock(return_value=None)
+    await coordinator._async_update_data()
+    assert mock_client.login.await_count == 2
