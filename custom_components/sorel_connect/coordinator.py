@@ -39,17 +39,19 @@ class SorelCoordinator(DataUpdateCoordinator[SorelData]):
 
         try:
             return await self._client.get_all()
-        except SorelAuthError:
-            # Session likely expired; re-login once and retry.
+        except (SorelAuthError, SorelConnectionError):
+            # Session likely expired (auth error or 502); re-login once and retry
+            # so the current poll cycle isn't skipped.
+            self._logged_in = False
             try:
                 await self._login()
                 return await self._client.get_all()
-            except (SorelAuthError, SorelConnectionError) as err:
+            except SorelAuthError as err:
                 self._logged_in = False
                 raise ConfigEntryAuthFailed("Re-authentication failed") from err
-        except SorelConnectionError as err:
-            self._logged_in = False
-            raise UpdateFailed(str(err)) from err
+            except SorelConnectionError as err:
+                self._logged_in = False
+                raise UpdateFailed(str(err)) from err
 
     async def _login(self) -> None:
         try:
